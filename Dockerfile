@@ -1,19 +1,15 @@
-# Use OpenJDK 17 slim image (public, no auth issue)
+# Use openjdk instead of maven image
 FROM openjdk:17-slim
 
-# Install Maven and dependencies
-RUN apt-get update && \
-    apt-get install -y maven git curl unzip && \
-    apt-get clean
+# Install Maven manually
+RUN apt-get update && apt-get install -y maven git curl unzip && apt-get clean
 
-# Set working directory
-WORKDIR /plugin
+WORKDIR /app
 
-# Copy everything
+# Copy project files
 COPY . .
 
-# Build the Jenkins plugin
+# Build the project (Jenkins plugin, for example)
 RUN mvn clean install -DskipTests
 
-# Optional default command
 CMD ["mvn", "test"]
