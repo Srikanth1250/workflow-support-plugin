@@ -1,34 +1,12 @@
-# ----------------------------
-# Stage 1: Build the plugin with Maven
-# ----------------------------
-FROM maven:3.9.9 AS builder
-
+# Stage 1: Build the Jenkins plugin
+FROM maven:3.9.9-openjdk-17 AS builder
 WORKDIR /app
-
-# Copy source files
 COPY . .
+RUN mvn clean package
 
-# Build the Jenkins plugin
-RUN mvn clean install -DskipTests
-
-# ----------------------------
-# Stage 2: Create Jenkins with the plugin installed
-# ----------------------------
+# Stage 2: Jenkins with plugin
 FROM jenkins/jenkins:lts
-
 USER root
-
-# Install any required OS packages
 RUN apt-get update && apt-get install -y curl
-
-# Create plugins directory
-RUN mkdir -p /usr/share/jenkins/ref/plugins
-
-# Copy built .hpi plugin from builder stage
 COPY --from=builder /app/target/*.hpi /usr/share/jenkins/ref/plugins/
-
-# Optionally pre-install other plugins (like unique-id)
-RUN jenkins-plugin-cli --plugins unique-id
-
-# Set back to Jenkins user
 USER jenkins
