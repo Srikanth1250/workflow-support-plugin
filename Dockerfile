@@ -1,27 +1,24 @@
-# Use official OpenJDK 17 slim image
-FROM openjdk:17-jdk-slim
+# Use Maven with Java 17 (based on slim OpenJDK image)
+FROM maven:3.9.6-eclipse-temurin-17 as builder
 
-# Set environment variables to reduce prompts during install
-ENV DEBIAN_FRONTEND=noninteractive
+# Set working directory
+WORKDIR /app
 
-# Install Maven, Git, Curl, and Unzip
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        maven \
-        git \
-        curl \
-        unzip && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Set working directory inside the container
-WORKDIR /plugin
-
-# Copy all project files into the container
+# Copy all project files into container
 COPY . .
 
-# Build the Jenkins plugin, skipping tests for faster builds
+# Build the Jenkins plugin (skip tests for speed; remove if needed)
 RUN mvn clean install -DskipTests
 
-# Optional: Set the default command
-CMD ["mvn", "test"]
+# Optional: use a runtime container if you want to run something with the plugin
+# For Jenkins plugin builds only, you typically only need the .hpi file
+FROM eclipse-temurin:17-jdk-slim as runtime
+
+# Copy the built HPI from the builder stage
+COPY --from=builder /app/target/*.hpi /plugin/
+
+# Set working directory to where the plugin is copied
+WORKDIR /plugin
+
+# List plugin file (optional) when container runs
+CMD ["ls", "-l", "/plugin"]
