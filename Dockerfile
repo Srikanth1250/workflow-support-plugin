@@ -1,19 +1,27 @@
-# Use official OpenJDK 17 base image
+# Use official OpenJDK 17 slim image
 FROM openjdk:17-jdk-slim
 
-# Install Maven and other required tools
-RUN apt-get update && \
-    apt-get install -y maven git curl unzip && \
-    apt-get clean
+# Set environment variables to reduce prompts during install
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Set working directory
+# Install Maven, Git, Curl, and Unzip
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        maven \
+        git \
+        curl \
+        unzip && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set working directory inside the container
 WORKDIR /plugin
 
-# Copy project files
+# Copy all project files into the container
 COPY . .
 
-# Build the Jenkins plugin (skipping tests to speed it up)
+# Build the Jenkins plugin, skipping tests for faster builds
 RUN mvn clean install -DskipTests
 
-# Default command (optional)
+# Optional: Set the default command
 CMD ["mvn", "test"]
