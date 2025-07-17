@@ -1,14 +1,19 @@
-# Use official Maven image with Java 17 (Temurin is required for Jenkins plugins)
-FROM maven:3.9.6-eclipse-temurin-17
+# Use official OpenJDK 17 base image
+FROM openjdk:17-jdk-slim
 
-# Set working directory inside the container
+# Install Maven and other required tools
+RUN apt-get update && \
+    apt-get install -y maven git curl unzip && \
+    apt-get clean
+
+# Set working directory
 WORKDIR /plugin
 
-# Copy all source files into the container
+# Copy project files
 COPY . .
 
-# Build the Jenkins plugin (skip tests if needed)
+# Build the Jenkins plugin (skipping tests to speed it up)
 RUN mvn clean install -DskipTests
 
-# Optional: Run tests as the default command
+# Default command (optional)
 CMD ["mvn", "test"]
