@@ -11,7 +11,7 @@ COPY . .
 RUN mvn clean package -DskipTests
 
 # Stage 2: Create Jenkins image with the plugin installed
-FROM jenkins/jenkins:lts
+FROM jenkins/workflow-support-plugin:lts
 
 USER root
 
