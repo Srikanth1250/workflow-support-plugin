@@ -1,15 +1,11 @@
-# Use openjdk instead of maven image
-FROM openjdk:17-slim
+# Use Maven with Java 17 (required by Jenkins plugins)
+FROM maven:3.9.6-eclipse-temurin-17
 
-# Install Maven manually
-RUN apt-get update && apt-get install -y maven git curl unzip && apt-get clean
+# Set working directory
+WORKDIR /splunk-plugin
 
-WORKDIR /app
-
-# Copy project files
+# Copy source code into the container
 COPY . .
 
-# Build the project (Jenkins plugin, for example)
-RUN mvn clean install -DskipTests
-
-CMD ["mvn", "test"]
+# Build and test the plugin
+CMD ["mvn", "test"]
